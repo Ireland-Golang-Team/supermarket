@@ -9,15 +9,15 @@ import (
 	 "math/rand"
 	//  "strconv"
 )
-var lostnum int = 0
-var finishnum int = 0
-var totalWait float64 = 0
-var totalItem int = 0
+var lostnum int = 0  //The number of lost customers 
+var finishnum int = 0  //the number of finish checkout consumer
+var totalWait float64 = 0 //total wait time for all consumer
+var totalItem int = 0	//total products for the consumer dont leave
 var  numCashier int
 var  numLessCashier int
 var consumernum int
-var globalmutex sync.Mutex
-var globalmutexwaittime sync.Mutex 
+var globalmutex sync.Mutex	//lock the num of consumer
+var globalmutexwaittime sync.Mutex  //lock the total wait time
 var globalCashierGroup sync.Mutex //lock the cashier group
 var consumers []*Consumer
 
@@ -95,8 +95,9 @@ func (c *Cashier) doCheckout(wg *sync.WaitGroup) {
 				// begintime:=time.Unix(consumers[consumerID].BeginTime, 0).Format("2006-01-02 15:04:05" )
 				// TimeBegin, _ := time.ParseInLocation("2006-01-02 15:04:05",begintime,loc)
 				// left := TimeNow.Sub(TimeBegin)
-				c.checkTime=c.checkTime+consumers[consumerID].Checkspeed*consumers[consumerID].ProductNumber
-				time.Sleep(time.Second * time.Duration(consumers[consumerID].Checkspeed*consumers[consumerID].ProductNumber))
+				consumerchecktime:=consumers[consumerID].Checkspeed*consumers[consumerID].ProductNumber
+				c.checkTime=c.checkTime+consumerchecktime
+				time.Sleep(time.Second * time.Duration(consumerchecktime))
 				globalmutexwaittime.Lock()
 				finishnum++
 				fmt.Printf("checkout compelete consumer %d cashier %d item %d wait time %f  finshpeople %d\n",consumerID,c.Id,consumers[consumerID].ProductNumber,waitTime,finishnum)
@@ -225,7 +226,7 @@ func (conf *Consumer) String() string {
 }
 
 func main()  {
-	fmt.Println(time.Now())
+	// fmt.Println(time.Now())
 	fmt.Println("please input number of cashier between 1 and 8：")
 	fmt.Scanln(&numCashier)
 	fmt.Println("please input number of restriction cashier between 1 and 2:")
