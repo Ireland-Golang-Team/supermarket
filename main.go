@@ -95,12 +95,12 @@ func (c *Cashier) doCheckout(wg *sync.WaitGroup) {
 				// begintime:=time.Unix(consumers[consumerID].BeginTime, 0).Format("2006-01-02 15:04:05" )
 				// TimeBegin, _ := time.ParseInLocation("2006-01-02 15:04:05",begintime,loc)
 				// left := TimeNow.Sub(TimeBegin)
-				consumerchecktime:=int(consumers[consumerID].Checkspeed*float64(consumers[consumerID].ProductNumber)*1000.0)
-				c.checkTime=c.checkTime+float64(consumerchecktime)/1000.0
+				consumerchecktime:=int(consumers[consumerID].Checkspeed*float64(consumers[consumerID].ProductNumber)*1000.0)//millisecond
+				c.checkTime=c.checkTime+float64(consumerchecktime)/1000.0  //second
 				time.Sleep(time.Millisecond * time.Duration(consumerchecktime))
 				globalmutexwaittime.Lock()
 				finishnum++
-				fmt.Printf("checkout compelete consumer %d cashier %d item %d wait time %f  finshpeople %d\n",consumerID,c.Id,consumers[consumerID].ProductNumber,waitTime,finishnum)
+				fmt.Printf("consumer %d cashier %d productnumber %d wait time %f  finshpeople %d\n",consumerID,c.Id,consumers[consumerID].ProductNumber,waitTime,finishnum)
 				globalmutexwaittime.Unlock()
 				wg.Done()
 			}
@@ -166,7 +166,7 @@ func (c *Consumer) setCheckspeed() {
 func (c *Consumer) findQueue(cashiers []*Cashier,w *Weather,wg *sync.WaitGroup){
 	count :=rand.Intn(100)	
 	// time.Sleep(time.Millisecond *time.Duration(count))	
-	time.Sleep(time.Second *time.Duration(count))//set some time for the consumer before they enter the supermarket
+	// time.Sleep(time.Second *time.Duration(count))//set some time for the consumer before they enter the supermarket
 	var num int = -1;
 	var cap int = 6 ;
 	time.Sleep(time.Second * time.Duration(c.WaitTime*w.weatherEffect))//time arrive at the checkouts 
@@ -273,19 +273,20 @@ func main()  {
 
 	}
 	wg.Wait()
-	averageutilization := 0.0
+	totalutilization := 0.0 //total checkout time
 	TimeNow:=time.Now().UnixNano()
 	fmt.Println("simulation compelete")
+	fmt.Printf("total %d consumers leave\n",lostnum)
 	fmt.Printf("total products processed %d average products per trolley %f\n",totalItem,float64(totalItem)/float64(finishnum))
 	fmt.Printf("average customer wait time %f\n",totalWait/float64(finishnum))
 	totalCashierTime :=0.0
 	for i := 0; i < numCashier; i++ {
 		left:=float64(TimeNow-cashiers[i].BeginTime)/1e9
 		totalCashierTime=totalCashierTime+left
-		averageutilization=averageutilization+cashiers[i].checkTime
+		totalutilization=totalutilization+cashiers[i].checkTime
 		fmt.Printf("Cashier%d utilization %f\n",i,float64(cashiers[i].checkTime)*100.0/left)
 	}
-	fmt.Printf("average utilization %f\n",float64(averageutilization*100.0)/totalCashierTime)
+	fmt.Printf("average utilization %f\n",float64(totalutilization*100.0)/totalCashierTime)
 	// for i := 0; i < 10; i++ {
 	// 	fmt.Println(consumers[i].String())
 	// }
