@@ -35,12 +35,12 @@ type Cashier struct {
 	Limit int
 	// lock sync.Mutex
 	BeginTime int64
-	checkTime int
+	checkTime float64
 }
 type Consumer struct {
 	Id int
 	ProductNumber int
-	Checkspeed int
+	Checkspeed float64
 	WaitTime int
 	BeginTime int64
 }
@@ -95,9 +95,9 @@ func (c *Cashier) doCheckout(wg *sync.WaitGroup) {
 				// begintime:=time.Unix(consumers[consumerID].BeginTime, 0).Format("2006-01-02 15:04:05" )
 				// TimeBegin, _ := time.ParseInLocation("2006-01-02 15:04:05",begintime,loc)
 				// left := TimeNow.Sub(TimeBegin)
-				consumerchecktime:=consumers[consumerID].Checkspeed*consumers[consumerID].ProductNumber
-				c.checkTime=c.checkTime+consumerchecktime
-				time.Sleep(time.Second * time.Duration(consumerchecktime))
+				consumerchecktime:=int(consumers[consumerID].Checkspeed*float64(consumers[consumerID].ProductNumber)*1000.0)
+				c.checkTime=c.checkTime+float64(consumerchecktime)/1000.0
+				time.Sleep(time.Millisecond * time.Duration(consumerchecktime))
 				globalmutexwaittime.Lock()
 				finishnum++
 				fmt.Printf("checkout compelete consumer %d cashier %d item %d wait time %f  finshpeople %d\n",consumerID,c.Id,consumers[consumerID].ProductNumber,waitTime,finishnum)
@@ -148,17 +148,17 @@ func (c *Consumer) setProductNumber() {
 func (c *Consumer) setCheckspeed() {
 	num:=rand.Intn(100)
 	if num>=99{
-		c.Checkspeed=6
+		c.Checkspeed=5.0+rand.Float64()
 	}else if num>=98{
-		c.Checkspeed=5
+		c.Checkspeed=4.0+rand.Float64()
 	}else if num >=97{
-		c.Checkspeed=4
+		c.Checkspeed=3.0+rand.Float64()
 	}else if num>= 95{
-		c.Checkspeed=3
+		c.Checkspeed=2.0+rand.Float64()
 	}else if num>=90{
-		c.Checkspeed=2
+		c.Checkspeed=1.0+rand.Float64()
 	}else{
-		c.Checkspeed=1
+		c.Checkspeed=float64(rand.Intn(50)+50)/100
 	}
 	// c.Checkspeed  =rand.Intn(5) + 1
 	// c.Checkspeed = rand.Float64()*5.5+0.5
@@ -273,7 +273,7 @@ func main()  {
 
 	}
 	wg.Wait()
-	var averageutilization int = 0
+	averageutilization := 0.0
 	TimeNow:=time.Now().UnixNano()
 	fmt.Println("simulation compelete")
 	fmt.Printf("total products processed %d average products per trolley %f\n",totalItem,float64(totalItem)/float64(finishnum))

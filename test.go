@@ -6,10 +6,9 @@ import (
 	// "time"
 	// "bytes"
 	//  "encoding/json"
-	//  "math/rand"
+	 "math/rand"
 	//  "strconv"
 )
-func main{
-	a:="1.22s"
-	printf(int64(a))
+func main(){
+	fmt.Println(float64(rand.Intn(50)+50)/100)
 }
