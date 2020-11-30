@@ -166,7 +166,7 @@ func (c *Consumer) setCheckspeed() {
 func (c *Consumer) findQueue(cashiers []*Cashier,w *Weather,wg *sync.WaitGroup){
 	count :=rand.Intn(100)	
 	// time.Sleep(time.Millisecond *time.Duration(count))	
-	// time.Sleep(time.Second *time.Duration(count))//set some time for the consumer before they enter the supermarket
+	time.Sleep(time.Second *time.Duration(count))//set some time for the consumer before they enter the supermarket
 	var num int = -1;
 	var cap int = 6 ;
 	time.Sleep(time.Second * time.Duration(c.WaitTime*w.weatherEffect))//time arrive at the checkouts 
